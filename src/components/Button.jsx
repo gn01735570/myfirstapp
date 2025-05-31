@@ -6,27 +6,39 @@ function Button(){
     // const [max, setMax] = useState(10);//自訂最大點擊次數
     const [maxClicks, setMaxClicks] = useState(10);
     const [maxInput, setMaxInput] = useState("10"); // 綁定輸入欄位
-    
+    const LOCAL_KEY = "clickHistory";
+
+    // componentDidMount 只會在畫面第一次載入時執行一次
     useEffect(() => {
         try{
-        const stored = localStorage.getItem("clickHistory");
+        const stored = localStorage.getItem(LOCAL_KEY);
         if (stored) {
-            setHistory(JSON.parse(stored));
+            const parsed = JSON.parse(stored);
+            setHistory(parsed);
+            // react的setState是非同步的, 不是等 history state 改完才來用
+            setClickCount(parsed.length);
         }} catch (e) {
             console.log("Failed to parse localStorage:", e);
         }
-    },[]);
+    }, []);
 
+    // 用 useEffect(() => {...}, [history]) 監聽變化可行, 只有在下一輪 render（畫面重渲染）後
     useEffect(()=>{
-        localStorage.setItem("clickHistory", JSON.stringify(history))
+        localStorage.setItem(LOCAL_KEY, JSON.stringify(history))
     }, [history]);
 
     const handleClick = () => {
         if (clickCount >= maxClicks) return;
         setClickCount((prev) => prev + 1);
 
-        const now = new Date().toLocaleString();
-        setHistory((prev) => [now, ...prev]);
+        const now = new Date();
+        const formatted = now.toLocaleTimeString("zh-TW",{
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+        });
+        // 函式型更新, 避免非同步更新錯亂
+        setHistory((prev) => [formatted, ...prev]);
     };
 
     const handleReset = () => {
@@ -51,6 +63,7 @@ function Button(){
             <input type="number"  value={maxInput} min="1" onChange={handleMaxChange}
             style={{ marginLeft: "0.5rem", padding:"0.3rem", width:"60px", border:"1px solid #ccc", borderRadius:"6px"}}
             />
+            {isNaN(parseInt(maxInput)) || parseInt(maxInput) <= 0 ? (<p style={{ color: "orange"}}>請輸入有效的正整數</p>) : null}
             </div>
             <button
             onClick={handleClick}
