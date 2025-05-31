@@ -1,10 +1,12 @@
 import Greeting from './components/Greeting';
 import ProfileCard from './components/ProfileCard';
 import Button from './components/Button';
+import TodoApp from './components/TodoApp';
 function App() {
   return (
     <div style={{ padding: "2rem", fontFamily: "Arial"}}>
       <h1>Welcome to React</h1>
+      <TodoApp />
       <Greeting />
       <ProfileCard
         name="Jane"
